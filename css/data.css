@@ -1,0 +1,32 @@
+/* #tab-data {
+	height: 30vh;
+	width: 40vw;
+	overflow-y: auto;
+	overflow-x: auto;
+} */
+
+.dataTables_wrapper{
+	width: 50vw;
+	/* height: 30vh; */
+	/* flex-grow: 0; */
+	margin: 20px 3vh;
+	border-right: medium dashed black;
+	padding: 20px;
+}
+
+.col-select {
+	display: flex;
+	margin: 20px;
+	border: 1px dashed black;
+	padding: 20px;
+}
+.widget-preview {
+	padding: 10px;
+	margin-left: 2vw;
+	display: flex;
+}
+
+.widget-preview div{
+	margin-left: 1vw;
+	/* display: flex; */
+}

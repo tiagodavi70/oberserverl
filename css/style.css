@@ -1,0 +1,29 @@
+* {
+	font-family: var(--sl-font-sans);	
+}
+
+.input-scale {
+	width: 8%;
+	margin: 2px;
+}
+
+.input-scale::part(input)
+{
+    font-size:14px;
+}
+
+#slider-scale {
+	width: 30%;
+	margin: 3% 1%;
+}
+
+
+
+/* body {
+	font: 90%/1.45em "Helvetica Neue", HelveticaNeue, Verdana, Arial, Helvetica, sans-serif;
+	margin: 0;
+	padding: 0;
+	color: #333;
+	background-color: #fff;
+}
+   */

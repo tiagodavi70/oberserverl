@@ -1,0 +1,70 @@
+<html lang="pt-BR">
+    <meta charset="UTF-8">
+    <head>
+        <title> Sandbox </title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+        <script src="https://unpkg.com/aframe-physics-system@1.4.0/dist/aframe-physics-system.min.js"></script>
+
+        <!-- <script src="https://jspm.dev/@spectrum-web-components/bundle/elements.js" type="module" async ></script>
+        
+        <link rel="stylesheet" href="https://unpkg.com/@adobe/coral-spectrum@4.5.0/dist/css/coral.min.css">
+        <script src="https://unpkg.com/@adobe/coral-spectrum@4.5.0/dist/js/coral.min.js" data-coral-icons-external="js"></script>
+         -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.3.0/dist/themes/light.css" />
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.3.0/dist/shoelace-autoloader.js"></script>
+
+        <link rel="stylesheet" href="css/style.css" />
+<!--         
+        <script src="viz/matrix-view.js" type="module"></script>
+        <script src="viz/bar-chart.js" type="module"></script>
+        <script src="viz/line-chart.js" type="module"></script> -->
+
+    </head>
+    <body>
+        
+        <sl-tab-group placement="start" style="margin:1%">
+            <sl-tab slot="nav" panel="data">Data</sl-tab>
+            <sl-tab slot="nav" panel="viz" active>3D Viz</sl-tab>
+          
+            <sl-tab-panel name="data" >
+                <sl-button>Download </sl-button>
+            </sl-tab-panel>
+            <sl-tab-panel name="viz" active style="width: 90%; height:90vh; margin:1%">
+                
+                
+                <!-- ctr alt i-->
+                <a-scene id="main-scene" embedded style="display: block; width: 50vw; height:50vh"
+                inspector="url: https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js">
+                    <a-entity camera wasd-controls="acceleration:30" look-controls position="0 1.6 0"></a-entity>
+
+                    <a-entity id="mainscene">
+                    </a-entity>
+
+                    <a-box position="0 0 -6" rotation="0 0 0" color="blue"></a-box>
+                    <a-box position="0 0 -3" rotation="0 0 0" color="yellow"></a-box>
+                    <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+                    <a-sky color="#ECECEC"></a-sky>
+                </a-scene>
+                <sl-range id="scale-range"
+                    value=".1"
+                    min= ".01"
+                    max= "1"
+                    step=".000001"
+                    style="
+                    --track-color-active: var(--sl-color-primary-600);
+                    --track-color-inactive: var(--sl-color-primary-100);
+                    --track-active-offset: 50%;
+                    padding-top: 2%;
+                    width: 50%;
+                    "
+                ></sl-range>
+                <sl-input style="padding-top: 2%; width: 30%;"></sl-input>
+            </sl-tab-panel>
+        </sl-tab-group>
+    </body>
+    
+    <script src="src/data.js"></script>
+    <script src="src/app.js"></script>
+    <script src="src/setup.js" type="module"></script>
+</html>

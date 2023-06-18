@@ -1,0 +1,195 @@
+<html lang="pt-BR">
+    <meta charset="UTF-8">
+    <head>
+        <title> Sandbox </title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+        <script src="https://unpkg.com/aframe-physics-system@1.4.0/dist/aframe-physics-system.min.js"></script>
+		<script src="3dviz/look-controls-n.js"></script>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.css" />
+
+        <!-- <script src="https://jspm.dev/@spectrum-web-components/bundle/elements.js" type="module" async ></script>
+        
+        <link rel="stylesheet" href="https://unpkg.com/@adobe/coral-spectrum@4.5.0/dist/css/coral.min.css">
+        <script src="https://unpkg.com/@adobe/coral-spectrum@4.5.0/dist/js/coral.min.js" data-coral-icons-external="js"></script>
+         -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.3.0/dist/themes/light.css" />
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.3.0/dist/shoelace-autoloader.js"></script>
+
+        <link rel="stylesheet" href="css/style.css" />
+        
+        <!-- <script src="viz/matrix-view.js" type="module"></script>
+        <script src="viz/bar-chart.js" type="module"></script>
+        <script src="viz/line-chart.js" type="module"></script> -->
+        <script src="3dviz/utils.js" type="module"></script>
+        <script src="3dviz/array-view.js" type="module"></script>
+        <script src="3dviz/transform-view.js" type="module"></script>
+        <script src="src/camera.js"></script>
+		<script>
+			function setCamera() {
+	
+			}
+			function updateUI() {
+				let nodeIds = ["min-scale", "max-scale", "camera-speed", "camera-transform"];
+				// `#${id}`
+			}
+			function getUIParams() {
+	
+			}
+			function historic() {
+	
+			}
+		</script>
+    </head>
+    <body>
+		<transform-view id="camera-transform"></transform-view>
+        <!-- ctr alt i-->
+        <a-scene id="main-scene" embedded style="display: block; width: 50vw; height:50vh"
+        inspector="url: https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js">
+            <a-entity raycaster="objects:.clickable;" cursor="rayOrigin:mouse;"></a-entity>
+
+			<a-entity id="main-objects" scale="1 1 1">
+				<a-box position="0 2 -3" rotation="0 0 0" class="clickable" color="blue"></a-box>
+				<a-box position="7 10 -8" rotation="0 0 0" id="aa" class="clickable" color="blue"></a-box>
+				<a-box position="4 2 -3"  rotation="0 0 0" class="clickable" color="blue"></a-box>
+			
+			</a-entity>
+			<a-entity id="main-camera" wasd-controls="acceleration:30" look-controls-n="enabled: true">
+				<a-entity camera position="0 1.6 0"></a-entity>
+			</a-entity>
+
+            <a-plane position="0 0 -4"  rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+            <a-sky color="#ECEFAF"></a-sky>
+        </a-scene>
+		<sl-radio-group label="Select a camera speed" id="camera-speed" value="3">
+			<sl-radio-button value="1">1</sl-radio-button>
+			<sl-radio-button value="2">2</sl-radio-button>
+			<sl-radio-button value="3">3</sl-radio-button>
+			<sl-radio-button value="4">4</sl-radio-button>
+			<sl-radio-button value="5">5</sl-radio-button>
+		</sl-radio-group>
+		<script>
+			let cameraSpeed = document.querySelector("#camera-speed");
+			cameraSpeed.addEventListener("sl-change", function(event) {
+				console.log(this.value);
+			});
+		</script>
+
+		<div>
+			Scale factor
+			<div style="display: flex; margin: 1%;">
+				<sl-input id="min-scale" class="input-scale" type="Number" label="Min"></sl-input>
+				<div class="slider-styled" id="slider-scale"></div>
+				<sl-input id="max-scale" class="input-scale" type="Number" label="Max"></sl-input>
+				<sl-input id="scale-value" class="input-scale" type="Number" label="Value"></sl-input>
+			</div>
+		</div>
+		<script>
+			// 
+			let range = { min: -10, max: 10 };
+			let sliderScale = document.querySelector("#slider-scale");
+			let scaleInput = document.querySelector("#scale-value");
+			let minS = document.querySelector("#min-scale");
+			let maxS = document.querySelector("#max-scale");
+			noUiSlider.create(sliderScale, {
+				start: 1,
+				range: range,
+				step: .01,
+				tooltips: true
+			});
+			minS.value = range.min;
+			maxS.value = range.max;
+
+			minS.addEventListener("input", function(event) {
+				let r = sliderScale.noUiSlider.options.range;
+				r.min = +this.value;
+				sliderScale.noUiSlider.updateOptions({ range: r });
+				updateUI();
+			});
+			maxS.addEventListener("input", function(event) {
+				let r = sliderScale.noUiSlider.options.range;
+				r.max = +this.value;
+				sliderScale.noUiSlider.updateOptions({ range: r });
+				updateUI();
+			});
+			sliderScale.noUiSlider.on("update", () => {
+				let value = sliderScale.noUiSlider.get();
+				scaleInput.value = value;
+				updateUI();
+			});
+			scaleInput.addEventListener("input", function(event){
+				sliderScale.set(this.value);
+				updateUI();
+			});
+		</script>
+
+		<sl-button id="reset-camera">Reset camera </sl-button>
+		<sl-button id="adjust-camera">Adjust camera to objects </sl-button>
+
+		<script>
+
+			function adjustCamera(cam) {
+				let parent = d3.select("#main-objects")
+				let arr = Array.from(parent.node().children);
+				let midPosition = getMean(arr, true);
+				
+				parent.append("a-box")
+					.attr("id", "lookat")
+					.attr("position", getMean(arr))
+				cam.object3D.isCamera = true;
+
+				// setAttribute("look-at", "#lookat")
+				let target = getMean(arr)
+				camRotation(cam, c => {
+					c.object3D.lookAt(new THREE.Vector3(target.x, target.y, target.z));
+				});
+				
+			}
+			document.querySelector("#reset-camera").addEventListener("click", function(event) {
+				resetCamera(document.querySelector("#main-camera"));
+				this.blur();
+			});
+			document.querySelector("#adjust-camera").addEventListener("click", function(event) {
+				adjustCamera(document.querySelector("#main-camera"));
+				this.blur();
+			});
+
+			// 
+		</script>
+
+        <p id="debug"></p>
+    </body>
+    
+    <script>
+		function parseFromAframe(v) {
+			let p = v.position;
+			let r = v.rotation;
+			return {
+				position: {x: p[0], y: p[1], z: p[2]}, 
+				rotation: {x: r[0], y: r[1], z: r[2]}
+			}
+		}
+
+		let tViewId = "#camera-transform";
+        d3.select(tViewId).on("value-change", function(e, d) {
+			let transformUpdate = e.srcElement.transform;
+			document.querySelector("a-box")
+				.object3D.position.set(...transformUpdate.position);
+			document.querySelector("a-box")
+				.object3D.rotation.set(...transformUpdate.rotation.map(d => THREE.MathUtils.degToRad(d)));
+			updateUI();
+        });
+
+		d3.select("a-box").on('mousedown', function (evt) {
+			let newTransform = {"position": this.object3D.position, "rotation": this.getAttribute('rotation')};
+			document.querySelector(tViewId).transform = newTransform;
+			let logEvent = {};
+		});
+		
+		registerCameraListeners()
+    </script>
+
+	
+</html>

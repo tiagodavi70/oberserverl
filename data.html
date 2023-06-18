@@ -1,0 +1,153 @@
+<html lang="pt-BR">
+    <meta charset="UTF-8">
+    <head>
+        <title> Sandbox </title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+
+		<!-- <script src="https://jspm.dev/@spectrum-web-components/bundle/elements.js" type="module" async ></script> -->
+		<!-- <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+		<link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet"/> -->
+
+		<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
+		<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
+
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.3.0/dist/themes/light.css" />
+		<script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.3.0/dist/shoelace-autoloader.js"></script>
+	   
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.css" />
+		
+		<!-- <link rel="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"></link>
+		<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+		<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+		 -->
+		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+		<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+		<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/plug-ins/1.13.4/dataRender/ellipsis.js"></script>
+
+        <link rel="stylesheet" href="css/style.css"/>
+        <link rel="stylesheet" href="css/data.css"/>
+        
+        <script src="viz/bar-chart.js" type="module"></script>
+        <script src="viz/line-chart.js" type="module"></script>
+		<script src="src/data.js"></script>
+    </head>
+    <body>
+		<!-- <sl-tab-group id="data-columns" class="tab-columns">
+		</sl-tab-group> -->
+		<!-- <sp-theme scale="medium" color="light">
+			<sp-table size="m" id="tab-data"></sp-table>
+		</sp-theme> -->
+
+		<div id="main-container" style="display:flex">
+			<table id="tab-data" class="display" slot="start"></table>
+			<div slot="end">
+				<div class="col-select">
+					<sl-select label="Episode column" id="col-episode"> </sl-select>
+					<div id="area-episode">
+						<div class="widget-preview">
+							Episodes: <div id="ep-length"> --- </div>
+						</div>
+					</div>
+				</div>
+				<div class="col-select" >
+					<sl-select label="Timestep column" id="col-timestep"></sl-select>
+					<div>
+						<div class="widget-preview">
+							Mean timestep by episode: <div id="mean-timestep"> --- </div>
+						</div>
+						<div class="widget-preview">
+							Min-Max time: <div id="min-max"> --- </div>
+						</div>
+					</div>
+				</div>
+				<div class="col-select">
+					<sl-select label="Reward column" id="col-reward"></sl-select>
+					<div class="widget-preview">
+						Mean of reward values: <div id="mean-timestep"> --- </div>
+					</div>
+				</div>
+				<div>
+					Line chart preview
+				</div>
+			</div>
+		</div>
+		
+        <p id="debug"></p>
+    </body>
+
+    <script>
+		
+		function getColName(selector) {
+			let splitted = document.querySelector(selector).value.split("_");
+			let colIndex = splitted.length > 0 ? splitted[1] : -1;
+			return Object.keys(data[0])[colIndex]
+		}
+
+		function updateUI(){
+			let epCol = getColName("#col-episode");
+			if (epCol) {
+				let arr_eps = data.map(d => d[epCol]);
+				arr_eps = [...new Set(arr_eps)];
+				d3.select("#ep-length").text(arr_eps.length);
+			}
+			let tsCol = getColName("#col-timestep");
+			if (tsCol && epCol) {
+				let groupsTs = d3.rollup(data, epi => d3.mean(epi, ep=> ep[tsCol]), row => row[epCol]);
+				groupsTs = Array.from(groupsTs)
+				let mean = d3.mean(groupsTs, g => g[1]);
+				d3.select("#mean-timestep").text(Number.parseFloat(mean).toFixed(2));
+				let minmax = [d3.min(groupsTs, g => g[1]), d3.max(groupsTs, g => g[1])];
+				d3.select("#min-max").text(minmax[0] + ", " + minmax[1]);
+			}
+		}
+
+		function setupEpisodeSelector(data, col) {
+			
+		}
+
+		function setupUI(data) {
+			let cols = Object.keys(data[0]);
+			
+			let middata = shuffle(d3.range(50).map(d => getRandomInt(0, data.length))).map(i => data[i]);
+			tabulate(middata, cols, "#tab-data");
+
+			// https://datatables.net/
+			$(document).ready( function () {
+				let table = $('#tab-data').DataTable({
+					scrollX: true,
+					"scrollY": "40%",
+  					"scrollCollapse": true,
+					columnDefs: [ {
+						targets: d3.range(cols.length),
+						render: $().DataTable.render.ellipsis( 8, false ),
+					}],
+				});
+			})
+			
+			let cols_s = ["timestep", "reward", "episode"];
+			cols_s.map(s => {
+				let sel = d3.select(`#col-${s}`);
+				sel.selectAll("sl-option")
+					.data(cols)
+					.join("sl-option")
+						.text(d => d)
+						.attr("value", (d,i) => "option_" + i)
+				sel.on("sl-input", function(event) {
+					// setupEpisodeSelector(data, "episode id");
+					updateUI()
+				});
+			});
+		}
+	</script>
+    
+	<script>
+		
+		promiseLoadData.then(dataC => {
+			data = dataC;
+			// console.log(data);
+			setupUI(data);
+		})
+    </script>
+</html>
